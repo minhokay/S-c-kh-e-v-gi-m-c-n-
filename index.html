@@ -1,1 +1,333 @@
 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sức Khoỏe & Vóc Dáng Pro</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            padding: 10px 0;
+            border-bottom: 2px solid #3498db;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        button {
+            width: 100%;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button.btn-success {
+            background-color: #2ecc71;
+        }
+        button.btn-success:hover {
+            background-color: #27ae60;
+        }
+        .result-box {
+            background-color: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .badge-info { background-color: #3498db; }
+        .badge-success { background-color: #2ecc71; }
+        .badge-warning { background-color: #f1c40f; color: #333; }
+        .badge-danger { background-color: #e74c3c; }
+        
+        .menu-item, .workout-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .menu-item:last-child, .workout-item:last-child {
+            border-bottom: none;
+        }
+        .time-select {
+            display: flex;
+            gap: 10px;
+        }
+        .notification-status {
+            text-align: center;
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Sức Khỏe & Vóc Dáng Pro</h1>
+    
+    <div class="card" style="background: #eef9ff; border: 1px solid #bee5eb;">
+        <h3>🔔 Hệ Thống Nhắc Nhở</h3>
+        <p style="font-size:13px; margin-bottom:10px;">Cài đặt giờ để app tự động thông báo nhắc nhở ăn uống và tập luyện trên điện thoại.</p>
+        <button id="btnInitAuth" class="btn-success">Kích Hoạt Quyền Thông Báo</button>
+        <div class="notification-status" id="notifStatus">Chưa cấp quyền thông báo</div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Tính Chỉ Số Cơ Thể (BMI & TDEE)</h3>
+        <div class="form-group">
+            <label>Chiều cao (cm):</label>
+            <input type="number" id="height" placeholder="Ví dụ: 165" value="165">
+        </div>
+        <div class="form-group">
+            <label>Cân nặng (kg):</label>
+            <input type="number" id="weight" placeholder="Ví dụ: 65" value="65">
+        </div>
+        <div class="form-group">
+            <label>Tuổi:</label>
+            <input type="number" id="age" placeholder="Ví dụ: 16" value="16">
+        </div>
+        <div class="form-group">
+            <label>Giới tính:</label>
+            <select id="gender">
+                <option value="male">Nam</option>
+                <option value="female">Nữ</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Mức độ vận động:</label>
+            <select id="activity">
+                <option value="1.2">Ít vận động (Chỉ học và ngồi)</option>
+                <option value="1.375">Vận động nhẹ (Tập nhẹ 1-3 ngày/tuần)</option>
+                <option value="1.55">Vận động vừa (Tập 3-5 ngày/tuần)</option>
+            </select>
+        </div>
+        <button onclick="calculateMetrics()">Tính Toán Chế Độ Giảm Cân</button>
+        
+        <div id="metricResults" class="result-box" style="display:none;">
+            <p><strong>BMI của bạn:</strong> <span id="bmiVal">0</span> (<span id="bmiStatus" class="badge"></span>)</p>
+            <p><strong>Calo giữ cân (TDEE):</strong> <span id="tdeeVal">0</span> kcal/ngày</p>
+            <p style="color: #e74c3c;"><strong>Calo để GIẢM CÂN:</strong> <span id="targetCalo">0</span> kcal/ngày</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🥗 Thực Đơn Giảm Cân Gợi Ý</h3>
+        <p style="font-size:12px; color:#7f8c8d; margin-bottom:10px;">Thực đơn giàu protein, thâm hụt calo an toàn cho học sinh:</p>
+        <div id="menuContainer">
+            <div class="menu-item">🌅 <strong>Sáng (7:00):</strong> 1 quả trứng luộc + 1 lát bánh mì đen hoặc 1 củ khoai lang nhỏ + 1 hộp sữa tươi không đường. (Tầm 300 kcal)</div>
+            <div class="menu-item">☀️ <strong>Trưa (11:30):</strong> 1.5 bát cơm gạt + 150g ức gà áp chảo hoặc cá hấp + 1 đĩa rau luộc to. (Tầm 550 kcal)</div>
+            <div class="menu-item">🍎 <strong>Phụ chiều (16:00):</strong> 1 quả táo hoặc 1 hộp sữa chua không đường. (Tầm 80 kcal)</div>
+            <div class="menu-item">🌆 <strong>Tối (19:00):</strong> 1 bát cơm gạt + 100g thịt bò hoặc đậu hũ sốt cà + Canh rau. Ăn nhiều rau trước khi ăn cơm. (Tầm 450 kcal)</div>
+        </div>
+        <div class="time-select" style="margin-top:10px;">
+            <input type="time" id="mealTime" value="07:00">
+            <button onclick="setReminder('mealTime', '🥗 Giờ ăn tới rồi!', 'Hãy ăn đúng bữa, đúng định lượng để giữ cơ bắp và giảm mỡ nhé!')">Hẹn Giờ Nhắc Ăn</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🏋️ Chế Độ Tập Luyện (Bodyweight)</h3>
+        <p style="font-size:12px; color:#7f8c8d; margin-bottom:10px;">Lộ trình tập không cần tạ, tự thực hiện tại nhà cực tốt:</p>
+        <div class="workout-item">💪 <strong>Squat (Đứng lên ngồi xuống):</strong> 3-4 hiệp, mỗi hiệp 15-20 cái (Phát triển đùi, mông, đốt calo cực lớn).</div>
+        <div class="workout-item">🧎 <strong>Chống đẩy (Push-up) hoặc Chống đầu gối:</strong> 3 hiệp, mỗi hiệp 10-12 cái.</div>
+        <div class="workout-item">🏃 <strong>Jumping Jacks (Nhảy vung tay):</strong> Tập liên tục 45 giây, nghỉ 15 giây (Thực hiện 3 lần để đốt mỡ).</div>
+        <div class="workout-item">🧘 <strong>Plank:</strong> Giữ tư thế 30-60 giây x 3 hiệp (Khỏe cơ bụng, săn chắc cốt lõi).</div>
+        
+        <div class="time-select" style="margin-top:10px;">
+            <input type="time" id="workoutTime" value="17:00">
+            <button onclick="setReminder('workoutTime', '🏋️ Đến giờ tập luyện rồi!', 'Đứng lên Squat và Plank thôi cậu ơi! Vì một vóc dáng chuẩn đẹp!')" class="btn-success">Hẹn Giờ Tập</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>✍️ Bộ Đếm Calo Đã Đốt (Ví dụ: Squat)</h3>
+        <div class="form-group">
+            <label>Số cái Squat hôm nay đã tập:</label>
+            <input type="number" id="squatCount" placeholder="Ví dụ: 50" value="0">
+        </div>
+        <button onclick="calculateBurn()">Tính Số Calo Tiêu Thụ</button>
+        <div id="burnResult" class="result-box" style="display:none; background-color: #f7eefc; border-left: 4px solid #9b59b6;">
+            Cậu đã đốt cháy được khoảng <strong id="burnedCalo" style="color:#8e44ad;">0</strong> kcal! Tiếp tục phát huy nhé!
+        </div>
+    </div>
+
+    <script>
+        // ĐĂNG KÝ SERVICE WORKER ĐỂ LÀM PWA CÓ THỂ CÀI ĐẶT
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker đã chạy thành công!', reg))
+                .catch(err => console.log('Lỗi Service Worker:', err));
+            });
+        }
+
+        // KÍCH HOẠT VÀ XIN QUYỀN THÔNG BÁO
+        const btnInitAuth = document.getElementById('btnInitAuth');
+        const notifStatus = document.getElementById('notifStatus');
+
+        btnInitAuth.addEventListener('click', () => {
+            if (!('Notification' in window)) {
+                alert('Trình duyệt hoặc điện thoại của cậu không hỗ trợ thông báo Web.');
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    notifStatus.innerText = "✅ Đã cấp quyền thông báo thành công!";
+                    notifStatus.style.color = "#2ecc71";
+                    new Notification("Sức Khỏe Pro", {
+                        body: "Tuyệt vời! Hệ thống thông báo nhắc nhở đã sẵn sàng hoạt động.",
+                        icon: "icon-192.png"
+                    });
+                } else {
+                    notifStatus.innerText = "❌ Từ chối quyền thông báo. Hãy bật trong cài đặt app.";
+                    notifStatus.style.color = "#e74c3c";
+                }
+            });
+        });
+
+        // TÍNH TOÁN BMI VÀ TDEE MỤC TIÊU
+        function calculateMetrics() {
+            const h = parseFloat(document.getElementById('height').value) / 100;
+            const w = parseFloat(document.getElementById('weight').value);
+            const age = parseInt(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            const activity = parseFloat(document.getElementById('activity').value);
+
+            if(!h || !w || !age) { alert('Hãy điền đủ thông tin nha cậu!'); return; }
+
+            // Tính BMI
+            const bmi = w / (h * h);
+            document.getElementById('bmiVal').innerText = bmi.toFixed(1);
+            
+            const badge = document.getElementById('bmiStatus');
+            badge.className = "badge";
+            if (bmi < 18.5) { badge.innerText = "Gầy"; badge.classList.add('badge-warning'); }
+            else if (bmi < 23) { badge.innerText = "Bình thường"; badge.classList.add('badge-success'); }
+            else if (bmi < 25) { badge.innerText = "Tiền béo phì"; badge.classList.add('badge-warning'); }
+            else { badge.innerText = "Béo phì"; badge.classList.add('badge-danger'); }
+
+            // Tính TDEE cơ bản theo công thức Mifflin-St Jeor
+            let bmr = 0;
+            if (gender === 'male') {
+                bmr = 10 * w + 6.25 * (h * 100) - 5 * age + 5;
+            } else {
+                bmr = 10 * w + 6.25 * (h * 100) - 5 * age - 161;
+            }
+            
+            const tdee = Math.round(bmr * activity);
+            const target = Math.round(tdee - 400); // Thâm hụt 400 calo để giảm cân an toàn
+
+            document.getElementById('tdeeVal').innerText = tdee;
+            document.getElementById('targetCalo').innerText = target;
+            document.getElementById('metricResults').style.display = 'block';
+        }
+
+        // TÍNH CALO ĐỐT CHÁY KHI SQUAT
+        function calculateBurn() {
+            const count = parseInt(document.getElementById('squatCount').value);
+            const w = parseFloat(document.getElementById('weight').value) || 60;
+            if(!count || count <= 0) { alert('Hãy nhập số cái cậu đã squat nhé!'); return; }
+            
+            const burnPerRep = 0.005 * w; 
+            const totalBurn = Math.round(count * burnPerRep);
+            
+            document.getElementById('burnedCalo').innerText = totalBurn;
+            document.getElementById('burnResult').style.display = 'block';
+        }
+
+        // HẸN GIỜ THÔNG BÁO THỜI GIAN THỰC (CHECK MỖI 30 GIÂY)
+        let reminders = [];
+
+        function setReminder(inputId, title, body) {
+            if (Notification.permission !== 'granted') {
+                alert('Cậu cần bấm nút "Kích Hoạt Quyền Thông Báo" ở phía trên trước nha!');
+                return;
+            }
+            const timeVal = document.getElementById(inputId).value;
+            if (!timeVal) return;
+
+            reminders.push({ time: timeVal, title: title, body: body, triggered: false });
+            alert(`✅ Đã đặt lịch nhắc nhở vào lúc ${timeVal} mỗi ngày! Hãy giữ ứng dụng chạy đa nhiệm để không bỏ lỡ nhé.`);
+        }
+
+        setInterval(() => {
+            const now = new Date();
+            const currentHourMin = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            if (currentHourMin === "00:00") {
+                reminders.forEach(r => r.triggered = false);
+            }
+
+            reminders.forEach(r => {
+                if (r.time === currentHourMin && !r.triggered) {
+                    if (Notification.permission === 'granted') {
+                        new Notification(r.title, {
+                            body: r.body,
+                            icon: "icon-192.png"
+                        });
+                        r.triggered = true; 
+                    }
+                }
+            });
+        }, 30000);
+    </script>
+</body>
+          </html>
+          
